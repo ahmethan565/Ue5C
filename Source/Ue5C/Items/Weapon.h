@@ -28,6 +28,8 @@ public:
 
 	void AttachWeapon(USceneComponent* InParent, FName InSocketName);
 
+	TArray<AActor*> IgnoreActors;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	USoundBase* EquipSound;
