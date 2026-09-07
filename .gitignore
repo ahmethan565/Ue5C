@@ -1,5 +1,9 @@
-# Visual Studio 2015 user specific files
+# IDE & User specific files
 .vs/
+.idea/
+*.sln.DotSettings.user
+*.DotSettings.user
+UpgradeLog.htm
 
 # Compiled Object files
 *.slo
