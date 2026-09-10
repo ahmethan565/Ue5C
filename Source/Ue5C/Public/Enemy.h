@@ -40,4 +40,10 @@ private:
 	*/
 	UPROPERTY(EditAnywhere, Category = AnimMontages)
 	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, Category = Sounds)
+	USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere, Category = VFXs)
+	UParticleSystem* HitVFX;
 };
