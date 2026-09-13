@@ -18,5 +18,6 @@ class UE5C_API IHitInterface
 
 
 public:
-	virtual void GetHit(const FVector& ImpactPoint) = 0;
+	UFUNCTION(BlueprintNativeEvent)
+	void GetHit(const FVector& ImpactPoint);
 };

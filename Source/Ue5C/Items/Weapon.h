@@ -30,6 +30,9 @@ public:
 
 	TArray<AActor*> IgnoreActors;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void CreateFieldSystemComponent(FVector FieldLocation);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	USoundBase* EquipSound;
