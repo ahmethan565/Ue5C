@@ -79,6 +79,11 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 	{
 		Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	if (WeaponBox)
+	{
+		WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -116,10 +121,8 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		if (HitInterface)
 		{
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
+			CreateFieldSystemComponent(BoxHit.ImpactPoint);
 		}
-
-		CreateFieldSystemComponent(BoxHit.ImpactPoint);
-
 		IgnoreActors.AddUnique(BoxHit.GetActor());
 	}
 }

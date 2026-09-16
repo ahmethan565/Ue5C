@@ -112,6 +112,11 @@ void AASlashCharacter::Attack()
 	}
 }
 
+void AASlashCharacter::AttackEnd()
+{
+	ActionState = EActionStates::EAS_Unoccupied;
+}
+
 bool AASlashCharacter::CanAttack()
 {
 	return (ActionState == EActionStates::EAS_Unoccupied &&
@@ -161,10 +166,6 @@ void AASlashCharacter::SetWeaponBoxCollision(ECollisionEnabled::Type CollisionTy
 	}
 }
 
-void AASlashCharacter::AttackEnd()
-{
-	ActionState = EActionStates::EAS_Unoccupied;
-}
 
 void AASlashCharacter::PlayAttackMontage()
 {

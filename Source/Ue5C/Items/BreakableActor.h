@@ -24,7 +24,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UGeometryCollectionComponent* BreakableCollection;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UCapsuleComponent* Capsule;
+
+	
+	UPROPERTY(EditAnywhere, Category = SpawnSets)
+	TArray<TSubclassOf<class ATreasure>> TreasureClasses;
 };
