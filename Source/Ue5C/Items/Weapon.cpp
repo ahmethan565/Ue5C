@@ -11,6 +11,7 @@
 #include "Interfaces/HitInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Interfaces/HitInterface.h"
+#include "NiagaraComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -63,6 +64,10 @@ void AWeapon::AttachWeapon(USceneComponent* InParent, FName InSocketName)
 
 void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 {
+	if (NiagaraComponent)
+	{
+		NiagaraComponent->Deactivate();
+	}
 	AttachWeapon(InParent, InSocketName);
 
 	ItemState = EItemState::EIS_Equipped;

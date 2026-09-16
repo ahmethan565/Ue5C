@@ -8,6 +8,7 @@
 #include "BreakableActor.generated.h"
 
 class UGeometryCollectionComponent;
+class UNiagaraComponent;
 
 UCLASS()
 class UE5C_API ABreakableActor : public AActor, public IHitInterface
@@ -30,7 +31,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCapsuleComponent* Capsule;
 
+private:
 	
 	UPROPERTY(EditAnywhere, Category = SpawnSets)
 	TArray<TSubclassOf<class ATreasure>> TreasureClasses;
+
+	bool bBroken = false;
 };

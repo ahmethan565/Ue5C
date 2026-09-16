@@ -2,9 +2,12 @@
 
 
 #include "Item.h"
+
+#include "MovieSceneObjectBindingID.h"
 #include "Ue5C/DebugMacros.h"
 #include "Components/SphereComponent.h"
 #include "Ue5C/Characters/ASlashCharacter.h"
+#include "NiagaraComponent.h"
 
 AItem::AItem()
 {
@@ -15,6 +18,9 @@ AItem::AItem()
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	Sphere->SetupAttachment(GetRootComponent());
+
+	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara"));
+	NiagaraComponent->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay()

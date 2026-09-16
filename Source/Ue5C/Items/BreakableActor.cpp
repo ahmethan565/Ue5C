@@ -2,6 +2,7 @@
 
 
 #include "BreakableActor.h"
+#include "BreakableActor.h"
 
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
@@ -12,7 +13,7 @@
 ABreakableActor::ABreakableActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
+	
 	BreakableCollection = CreateDefaultSubobject<UGeometryCollectionComponent>(TEXT("GeometryCollection"));
 	SetRootComponent(BreakableCollection);
 	BreakableCollection->SetGenerateOverlapEvents(true);
@@ -39,6 +40,8 @@ void ABreakableActor::Tick(float DeltaTime)
 
 void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint)
 {
+	if (bBroken) return;
+	bBroken = true;
 	UWorld* World = GetWorld();
 	if (World && TreasureClasses.Num() > 0)
 	{

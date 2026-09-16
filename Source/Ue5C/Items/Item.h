@@ -65,8 +65,11 @@ private:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float TimeConst = 5.f;
-	
 
+protected:
+	UPROPERTY(EditAnywhere, Category = Niagara)
+	class UNiagaraComponent* NiagaraComponent;
+	
 };
 
 template <typename T>
