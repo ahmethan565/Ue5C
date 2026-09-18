@@ -5,6 +5,8 @@
 #include "Ue5C/DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Ue5C/Components/AttributeComponent.h"
+#include "Ue5C/HUD/HealthBarComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -15,12 +17,17 @@ AEnemy::AEnemy()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 
+	HealthBar = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBar"));
+	HealthBar->SetupAttachment(GetRootComponent());
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HealthBar->SetHealthBarPercentage(.5f);
 	
 }
 
