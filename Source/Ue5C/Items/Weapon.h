@@ -24,7 +24,7 @@ class UE5C_API AWeapon : public AItem
     virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
 
 public:
-	void Equip(USceneComponent* InParent, FName InSocketName);
+	void Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator);
 
 	void AttachWeapon(USceneComponent* InParent, FName InSocketName);
 
@@ -55,4 +55,8 @@ protected:
 
 public:
 	FORCEINLINE UBoxComponent* GetWeaponBox() const {return WeaponBox; }
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	float Damage = 20.f;
 };

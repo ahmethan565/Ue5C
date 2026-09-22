@@ -62,8 +62,10 @@ void AWeapon::AttachWeapon(USceneComponent* InParent, FName InSocketName)
 	ItemMesh->AttachToComponent(InParent,TransformRules, InSocketName);
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
+void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator)
 {
+	SetOwner(NewOwner);
+	SetInstigator(NewInstigator);
 	if (NiagaraComponent)
 	{
 		NiagaraComponent->Deactivate();
@@ -122,6 +124,13 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 	if (BoxHit.GetActor())
 	{
+		UGameplayStatics::ApplyDamage(
+					BoxHit.GetActor(),
+					Damage,
+					GetInstigator()->GetController(),
+					this,
+					UDamageType::StaticClass());
+		
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{

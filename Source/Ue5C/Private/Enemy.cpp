@@ -1,4 +1,3 @@
-
 #include "Enemy.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -16,7 +15,7 @@ AEnemy::AEnemy()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
-	
+
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 
 	HealthBar = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBar"));
@@ -27,7 +26,7 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	HealthBar->SetHealthBarPercentage(.5f);
+	HealthBar->SetHealthBarPercentage(Attributes->GetHealthPercent());
 	
 }
 
@@ -44,13 +43,11 @@ void AEnemy::PlayHitReactMontage(const FName& SectionName)
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
@@ -76,7 +73,7 @@ void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 	}
 
 	FName Section("FromBack");
-	if (Theta >=-45.f && Theta < 45.f)
+	if (Theta >= -45.f && Theta < 45.f)
 	{
 		Section = FName("FromFront");
 	}
@@ -90,7 +87,7 @@ void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 	}
 
 	PlayHitReactMontage(FName(Section));
-	
+
 	/*
 	UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + CrossProduct * 100.f, 5.f, FColor::Blue, 5.f);
 
@@ -104,12 +101,45 @@ void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 	*/
 }
 
+void AEnemy::Die()
+{
+	if (DieMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		const int32 Selection = FMath::RandRange(0, 1);
+		FName SectionName = FName();
+		switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Death1");
+			DeathPose = EDeathPose::EDP_Dead2;
+			break;
+		case 1:
+			SectionName = FName("Death2");
+			DeathPose = EDeathPose::EDP_Dead1;
+			
+			break;
+		default:
+			break;
+		}
+		AnimInstance->Montage_Play(DieMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, DieMontage);
+	}
+}
+
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	// DRAW_SPHERE_COLOR(ImpactPoint, FColor::Cyan);
-	
-	DirectionalHitReact(ImpactPoint);
 
+	if (Attributes && Attributes->bIsAlive())
+	{
+		DirectionalHitReact(ImpactPoint);
+	}
+	else
+	{
+		Die();
+	}
+	
 	if (HitSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -127,3 +157,15 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 	}
 }
 
+float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
+                         AActor* DamageCauser)
+{
+	if (Attributes && HealthBar)
+	{
+		Attributes->ReceiveDamage(DamageAmount);
+
+		HealthBar->SetHealthBarPercentage(Attributes->GetHealthPercent());
+	}
+
+	return DamageAmount;
+}

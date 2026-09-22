@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
 #include "Interfaces/HitInterface.h"
+#include "Ue5C/Characters/CharacterStates.h"
 #include "Enemy.generated.h"
 
 class UAnimMontage;
@@ -24,8 +25,11 @@ public:
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void DirectionalHitReact(const FVector& ImpactPoint);
+	void Die();
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,6 +40,9 @@ protected:
 
 	void PlayHitReactMontage(const FName& SectionName);
 
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
 private:
 	/**
 	* Anim Montages
@@ -43,13 +50,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = AnimMontages)
 	UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = AnimMontages)
+	UAnimMontage* DieMontage;
+	
 	UPROPERTY(EditAnywhere, Category = Sounds)
 	USoundBase* HitSound;
 
 	UPROPERTY(EditAnywhere, Category = VFXs)
 	UParticleSystem* HitVFX;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAttributeComponent* Attributes;
 
 	UPROPERTY(VisibleAnywhere)
