@@ -5,6 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Ue5C/Components/AttributeComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Ue5C/HUD/HealthBarComponent.h"
 
 AEnemy::AEnemy()
@@ -20,6 +21,11 @@ AEnemy::AEnemy()
 
 	HealthBar = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBar"));
 	HealthBar->SetupAttachment(GetRootComponent());
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 }
 
 void AEnemy::BeginPlay()
@@ -27,7 +33,9 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	HealthBar->SetHealthBarPercentage(Attributes->GetHealthPercent());
-	
+
+	if (HealthBar)
+		HealthBar->SetVisibility(false);
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
@@ -43,6 +51,21 @@ void AEnemy::PlayHitReactMontage(const FName& SectionName)
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (CombatTarget)
+	{
+		const double DistanceToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).Size();
+
+		if (CombatRadius < DistanceToTarget)
+		{
+			CombatTarget = nullptr;
+			
+			if (HealthBar)
+			{
+				HealthBar->SetVisibility(false);
+			}
+		}
+	}
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -117,14 +140,21 @@ void AEnemy::Die()
 		case 1:
 			SectionName = FName("Death2");
 			DeathPose = EDeathPose::EDP_Dead1;
-			
+
 			break;
 		default:
 			break;
 		}
 		AnimInstance->Montage_Play(DieMontage);
+
 		AnimInstance->Montage_JumpToSection(SectionName, DieMontage);
+		SetLifeSpan(3.f);
 	}
+
+	if (HealthBar)
+		HealthBar->SetVisibility(false);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
@@ -139,7 +169,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 	{
 		Die();
 	}
-	
+
 	if (HitSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -165,7 +195,11 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 		Attributes->ReceiveDamage(DamageAmount);
 
 		HealthBar->SetHealthBarPercentage(Attributes->GetHealthPercent());
+
+		HealthBar->SetVisibility(true);
 	}
+
+	CombatTarget = EventInstigator->GetPawn();
 
 	return DamageAmount;
 }
