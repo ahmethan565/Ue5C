@@ -1,4 +1,7 @@
 #include "Enemy.h"
+
+#include "AIController.h"
+#include "NavigationPath.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Ue5C/DebugMacros.h"
@@ -6,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Ue5C/Components/AttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AIController.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Ue5C/HUD/HealthBarComponent.h"
 
 AEnemy::AEnemy()
@@ -36,6 +41,10 @@ void AEnemy::BeginPlay()
 
 	if (HealthBar)
 		HealthBar->SetVisibility(false);
+
+	EnemyController = Cast<AAIController>(GetController());
+
+	MoveToTarget(PatrolTarget);
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
@@ -48,24 +57,46 @@ void AEnemy::PlayHitReactMontage(const FName& SectionName)
 	}
 }
 
+void AEnemy::MoveToTarget(AActor* Target)
+{
+	FAIMoveRequest MoveReq;
+	MoveReq.SetGoalActor(Target);
+	MoveReq.SetAcceptanceRadius(15.f);
+	EnemyController->MoveTo(MoveReq);
+}
+
+AActor* AEnemy::ChoosePatrolTarget()
+{
+	TArray<AActor*> ValidTargets;
+	for (AActor* Target : PatrolTargets)
+	{
+		if (Target != PatrolTarget)
+		{
+			ValidTargets.AddUnique(Target);
+		}
+	}
+
+	const int32 NumPatrolTargets = ValidTargets.Num() - 1;
+	if (NumPatrolTargets > 0)
+	{
+		const int32 TargetSelection = FMath::RandRange(0, ValidTargets.Num() - 1);
+		return ValidTargets[TargetSelection];
+	}
+
+	return nullptr;
+}
+
+void AEnemy::PatrolTimerFinished()
+{
+	MoveToTarget(PatrolTarget);
+}
+
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (CombatTarget)
-	{
-		const double DistanceToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).Size();
-
-		if (CombatRadius < DistanceToTarget)
-		{
-			CombatTarget = nullptr;
-			
-			if (HealthBar)
-			{
-				HealthBar->SetVisibility(false);
-			}
-		}
-	}
+	CheckCombatTarget();
+	CheckPatrolTarget();
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -157,6 +188,15 @@ void AEnemy::Die()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+bool AEnemy::InTargetRange(AActor* Target, double Radius)
+{
+	if (Target == nullptr) return false;
+	const double DistanceToTarget = (Target->GetActorLocation() - GetActorLocation()).Size();
+	DRAW_SPHERE_SingleFrame(GetActorLocation());
+	DRAW_SPHERE_SingleFrame(Target->GetActorLocation());
+	return DistanceToTarget <= Radius;
+}
+
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	// DRAW_SPHERE_COLOR(ImpactPoint, FColor::Cyan);
@@ -202,4 +242,30 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 	CombatTarget = EventInstigator->GetPawn();
 
 	return DamageAmount;
+}
+
+void AEnemy::CheckPatrolTarget()
+{
+	if (InTargetRange(PatrolTarget, PatrolRadius))
+	{
+		PatrolTarget = ChoosePatrolTarget();
+		const float WaitTime = FMath::RandRange(WaitMin, WaitMax);
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolTimerFinished, WaitTime);
+	}
+}
+
+void AEnemy::CheckCombatTarget()
+{
+	if (CombatTarget)
+	{
+		if (!InTargetRange(CombatTarget, CombatRadius))
+		{
+			CombatTarget = nullptr;
+
+			if (HealthBar)
+			{
+				HealthBar->SetVisibility(false);
+			}
+		}
+	}
 }

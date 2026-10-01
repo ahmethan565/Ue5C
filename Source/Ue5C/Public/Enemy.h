@@ -24,15 +24,24 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
 	void DirectionalHitReact(const FVector& ImpactPoint);
-	void Die();
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	void CheckPatrolTarget();
+	
+	void CheckCombatTarget();
+	
+
 protected:
 	virtual void BeginPlay() override;
+
+	void Die();
+
+	bool InTargetRange(AActor* Target, double Radius);
 
 	/**
 	* Play Montage Sections
@@ -42,6 +51,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
+	void MoveToTarget(AActor* Target);
+
+	AActor* ChoosePatrolTarget();
 
 private:
 	/**
@@ -70,5 +83,30 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 500.f;
+
+	UPROPERTY(EditAnywhere)
+	double PatrolRadius = 150.f;
+
+	/**
+	 *Navigation
+	 */
+
+	UPROPERTY()
+	class AAIController* EnemyController;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	AActor* PatrolTarget;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TArray<AActor*> PatrolTargets;
+
+	FTimerHandle PatrolTimer;
+	void PatrolTimerFinished();
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float WaitMin = 5.f;
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float WaitMax = 8.f;
 	
 };
