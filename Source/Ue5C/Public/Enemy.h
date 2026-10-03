@@ -12,6 +12,7 @@
 class UAnimMontage;
 class UAttributeComponent;
 class UHealthBarComponent;
+class UPawnSensingComponent;
 
 UCLASS()
 class UE5C_API AEnemy : public ACharacter, public IHitInterface
@@ -56,6 +57,9 @@ protected:
 
 	AActor* ChoosePatrolTarget();
 
+	UFUNCTION()
+	void PawnSeen(APawn* SeenPawn);
+
 private:
 	/**
 	* Anim Montages
@@ -77,6 +81,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthBarComponent* HealthBar;
+
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensing;
 
 	UPROPERTY()
 	AActor* CombatTarget;
