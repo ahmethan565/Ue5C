@@ -92,7 +92,10 @@ private:
 	double CombatRadius = 500.f;
 
 	UPROPERTY(EditAnywhere)
-	double PatrolRadius = 150.f;
+	double PatrolRadius = 200.f;
+
+	UPROPERTY(EditAnywhere)
+	double AttackRadius = 150.f;
 
 	/**
 	 *Navigation
@@ -115,5 +118,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float WaitMax = 8.f;
-	
+
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation")
+	EEnemyStates EnemyState = EEnemyStates::EES_Patrolling;
 };

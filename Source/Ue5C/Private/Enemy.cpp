@@ -57,6 +57,20 @@ void AEnemy::BeginPlay()
 	}
 }
 
+void AEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (EnemyState > EEnemyStates::EES_Patrolling)
+	{
+		CheckCombatTarget();
+	}
+	else
+	{
+		CheckPatrolTarget();
+	}
+}
+
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -98,20 +112,24 @@ AActor* AEnemy::ChoosePatrolTarget()
 
 void AEnemy::PawnSeen(APawn* SeenPawn)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Pawn Seen!"));
+	if (EnemyState == EEnemyStates::EES_Chasing) return;
+	if (SeenPawn->ActorHasTag("SlashCharacter"))
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		GetWorldTimerManager().ClearTimer(PatrolTimer);
+		CombatTarget = SeenPawn;
+		if (EnemyState != EEnemyStates::EES_Attacking)
+		{
+			EnemyState = EEnemyStates::EES_Chasing;
+			MoveToTarget(CombatTarget);
+			UE_LOG(LogTemp, Warning, TEXT("Pawn Seen!, Chase Player"));
+		}
+	}
 }
 
 void AEnemy::PatrolTimerFinished()
 {
 	MoveToTarget(PatrolTarget);
-}
-
-void AEnemy::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	CheckCombatTarget();
-	CheckPatrolTarget();
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -256,6 +274,10 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 
 	CombatTarget = EventInstigator->GetPawn();
 
+	EnemyState = EEnemyStates::EES_Chasing;
+	MoveToTarget(CombatTarget);
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+
 	return DamageAmount;
 }
 
@@ -281,6 +303,28 @@ void AEnemy::CheckCombatTarget()
 			{
 				HealthBar->SetVisibility(false);
 			}
+
+			EnemyState = EEnemyStates::EES_Patrolling;
+			GetCharacterMovement()->MaxWalkSpeed = 150.f;
+			MoveToTarget(PatrolTarget);
+
+			UE_LOG(LogTemp, Warning, TEXT("Combat Target Lost Back to Patrolling"));
+		}
+
+		else if (!InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyStates::EES_Chasing)
+		{
+			//outside attack range chase player
+			EnemyState = EEnemyStates::EES_Chasing;
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
+			MoveToTarget(CombatTarget);
+			UE_LOG(LogTemp, Warning, TEXT("Chase Player"));
+		}
+
+		else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyStates::EES_Attacking)
+		{
+			EnemyState = EEnemyStates::EES_Attacking;
+			//TODO AttackMontage
+			UE_LOG(LogTemp, Warning, TEXT("Attack"));
 		}
 	}
 }

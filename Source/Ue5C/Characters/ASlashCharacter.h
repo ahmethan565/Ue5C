@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "CharacterStates.h"
+#include "ABaseCharacter.h"
 #include "ASlashCharacter.generated.h"
 
 class UInputMappingContext;
@@ -17,7 +18,7 @@ class UAnimMontage;
 class AWeapon;
 
 UCLASS()
-class UE5C_API AASlashCharacter : public ACharacter
+class UE5C_API AASlashCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 

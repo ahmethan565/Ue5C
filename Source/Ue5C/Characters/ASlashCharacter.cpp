@@ -31,6 +31,8 @@ AASlashCharacter::AASlashCharacter()
 	CameraBoom->SetupAttachment(RootComponent);
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	Camera->SetupAttachment(CameraBoom);
+
+	Tags.Add(FName("SlashCharacter"));
 }
 
 void AASlashCharacter::BeginPlay()
