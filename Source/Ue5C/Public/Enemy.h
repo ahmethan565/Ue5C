@@ -3,19 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "Interfaces/HitInterface.h"
-#include "Interfaces/HitInterface.h"
+#include "Ue5C/Characters/BaseCharacter.h"
 #include "Ue5C/Characters/CharacterStates.h"
 #include "Enemy.generated.h"
 
-class UAnimMontage;
-class UAttributeComponent;
 class UHealthBarComponent;
 class UPawnSensingComponent;
 
 UCLASS()
-class UE5C_API AEnemy : public ACharacter, public IHitInterface
+class UE5C_API AEnemy : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -25,8 +21,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	void DirectionalHitReact(const FVector& ImpactPoint);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
@@ -40,7 +34,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void Die();
+	virtual void Die() override;
 
 	bool InTargetRange(AActor* Target, double Radius);
 
@@ -48,7 +42,6 @@ protected:
 	* Play Montage Sections
 	*/
 
-	void PlayHitReactMontage(const FName& SectionName);
 
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
@@ -64,20 +57,6 @@ private:
 	/**
 	* Anim Montages
 	*/
-	UPROPERTY(EditAnywhere, Category = AnimMontages)
-	UAnimMontage* HitReactMontage;
-
-	UPROPERTY(EditAnywhere, Category = AnimMontages)
-	UAnimMontage* DieMontage;
-	
-	UPROPERTY(EditAnywhere, Category = Sounds)
-	USoundBase* HitSound;
-
-	UPROPERTY(EditAnywhere, Category = VFXs)
-	UParticleSystem* HitVFX;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UAttributeComponent* Attributes;
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthBarComponent* HealthBar;

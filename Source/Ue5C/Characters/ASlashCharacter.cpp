@@ -49,6 +49,15 @@ void AASlashCharacter::BeginPlay()
 	}
 }
 
+void AASlashCharacter::Attack()
+{
+	if (CanAttack())
+	{
+		PlayAttackMontage();
+		ActionState = EActionStates::EAS_Attacking;
+	}
+}
+
 void AASlashCharacter::Move(const FInputActionValue& Value)
 {
 	if (ActionState == EActionStates::EAS_Unoccupied)
@@ -105,15 +114,6 @@ void AASlashCharacter::EKeyPressed()
 	}
 }
 
-void AASlashCharacter::Attack()
-{
-	if (CanAttack())
-	{
-		PlayAttackMontage();
-		ActionState = EActionStates::EAS_Attacking;
-	}
-}
-
 void AASlashCharacter::AttackEnd()
 {
 	ActionState = EActionStates::EAS_Unoccupied;
@@ -158,16 +158,6 @@ void AASlashCharacter::FinishEquipping()
 {
 	ActionState = EActionStates::EAS_Unoccupied;
 }
-
-void AASlashCharacter::SetWeaponBoxCollision(ECollisionEnabled::Type CollisionType)
-{
-	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
-	{
-		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionType);
-		EquippedWeapon->IgnoreActors.Empty();
-	}
-}
-
 
 void AASlashCharacter::PlayAttackMontage()
 {

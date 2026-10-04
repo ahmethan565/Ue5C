@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "CharacterStates.h"
-#include "ABaseCharacter.h"
+#include "BaseCharacter.h"
 #include "ASlashCharacter.generated.h"
 
 class UInputMappingContext;
@@ -15,7 +14,6 @@ class UCameraComponent;
 class USpringArmComponent;
 class AItem;
 class UAnimMontage;
-class AWeapon;
 
 UCLASS()
 class UE5C_API AASlashCharacter : public ABaseCharacter
@@ -47,13 +45,12 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Jump(const FInputActionValue& Value);
 	void EKeyPressed();
-	void Attack();
-
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
+	virtual void Attack() override;
+	
+	virtual void AttackEnd() override;
 
 	/* Play Montage Funcs */
-	void PlayAttackMontage();
+	virtual void PlayAttackMontage() override;
 	void PlayEquipMontage(FName SectionName);
 	
 private:
@@ -66,15 +63,9 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	AWeapon* EquippedWeapon;
-
-
 	/**
 	 * Anim Montages
 	 */
-	UPROPERTY(EditAnywhere, Category = AnimMontages)
-	UAnimMontage* AttackingAnimMontage;
 
 	UPROPERTY(EditAnywhere, Category = AnimMontages)
 	UAnimMontage* EquipAnimMontage;
@@ -86,7 +77,7 @@ private:
 	UPROPERTY(BlueprintReadWrite, Category = AnimMontages, meta = (AllowPrivateAccess = "true"))
 	EActionStates ActionState = EActionStates::EAS_Unoccupied;
 
-	bool CanAttack();
+	virtual bool CanAttack() override;
 	bool CanDisarm();
 	bool CanArm();
 
@@ -98,9 +89,6 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
-
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponBoxCollision(ECollisionEnabled::Type CollisionType);
 
 
 public:
