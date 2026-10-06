@@ -12,6 +12,7 @@
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Ue5C/HUD/HealthBarComponent.h"
+#include "Ue5C/Items/Weapon.h"
 #include "Perception/PawnSensingComponent.h"
 
 AEnemy::AEnemy()
@@ -52,6 +53,14 @@ void AEnemy::BeginPlay()
 	if (PawnSensing)
 	{
 		PawnSensing->OnSeePawn.AddDynamic(this, &AEnemy::PawnSeen);
+	}
+
+	UWorld* World = GetWorld();
+	if (World && WeaponClass)
+	{
+		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+		DefaultWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+		EquippedWeapon = DefaultWeapon;
 	}
 }
 
@@ -263,5 +272,13 @@ void AEnemy::CheckCombatTarget()
 			//TODO AttackMontage
 			UE_LOG(LogTemp, Warning, TEXT("Attack"));
 		}
+	}
+}
+
+void AEnemy::Destroyed()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Destroy();
 	}
 }

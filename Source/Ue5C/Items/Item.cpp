@@ -21,6 +21,9 @@ AItem::AItem()
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara"));
 	NiagaraComponent->SetupAttachment(GetRootComponent());
+
+	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AItem::BeginPlay()

@@ -29,6 +29,8 @@ public:
 	void CheckPatrolTarget();
 	
 	void CheckCombatTarget();
+
+	virtual void Destroyed() override; 
 	
 
 protected:
@@ -54,9 +56,8 @@ protected:
 	void PawnSeen(APawn* SeenPawn);
 
 private:
-	/**
-	* Anim Montages
-	*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWeapon> WeaponClass;
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthBarComponent* HealthBar;
